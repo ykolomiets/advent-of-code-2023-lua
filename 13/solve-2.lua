@@ -32,7 +32,7 @@ end
 local function validate_reflection(values, split_after)
   local left = split_after - 1
   local right = split_after + 2
-  while (left > 0) and (right < #values + 1) do
+  while (left >= 1) and (right <= #values) do
     if values[left] ~= values[right] then
       return false
     end
@@ -42,12 +42,45 @@ local function validate_reflection(values, split_after)
   return true
 end
 
+local function is_one_bit_off(a, b)
+  local c = a ~ b
+  return c ~= 0 and (c & (c - 1)) == 0
+end
+
+local function validate_reflection_with_exactly_one_smudge(values, split_after)
+  local left = split_after - 1
+  local right = split_after + 2
+  local fixed = false
+  while (left >= 1) and (right <= #values) do
+    if fixed then
+      if values[left] ~= values[right] then
+        return false
+      end
+    else
+      if values[left] ~= values[right] then
+        if is_one_bit_off(values[left], values[right]) then
+          fixed = true
+        else
+          return false
+        end
+      end
+    end
+    left = left - 1
+    right = right + 1
+  end
+  return fixed
+end
+
 local function find_reflection_index(values)
   for i = 1, #values - 1 do
-    if values[i] == values[i + 1] and validate_reflection(values, i) then
+    if
+      (values[i] == values[i + 1] and validate_reflection_with_exactly_one_smudge(values, i)) or
+      (is_one_bit_off(values[i], values[i + 1]) and validate_reflection(values, i))
+    then
       return i
     end
   end
+
   return 0
 end
 
@@ -67,3 +100,4 @@ local function main()
 end
 
 main()
+
