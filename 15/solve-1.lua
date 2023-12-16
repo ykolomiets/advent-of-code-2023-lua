@@ -1,11 +1,4 @@
-local lpeg = require("lpeg")
-
-local function split (s, sep)
-  sep = lpeg.P(sep)
-  local elem = lpeg.C((1 - sep)^0)
-  local p = lpeg.Ct(elem * (sep * elem)^0)
-  return lpeg.match(p, s)
-end
+local stringx = require("pl.stringx")
 
 local function hash(str)
   local h = 0
@@ -20,7 +13,7 @@ end
 local function main()
   io.input(arg[1])
   local input = io.read("l")
-  local steps = split(input, ",")
+  local steps = stringx.split(input, ",")
   local sum = 0
   for _, step in ipairs(steps) do
     sum = sum + hash(step)
